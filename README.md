@@ -25,6 +25,80 @@ func TestCompatparseJWE(t *testing.T) {
   }
 }
 
+func TestFullParseJWE(t *testing.T) {
+  successes := []string{
+    ""
+    ""
+  }
+  
+  for i := range successes {
+    _, err := ParseEncrypted(success[i])
+    if err != nil {
+      t.Error("Unable to parse valid message", err, successes[i])
+    }
+  }
+  
+  failures := []string{
+    "",
+    "",
+    
+  }
+  
+  for i := range failures {
+    _, err := ParseEncrypted(failures[i])
+    if err == nil {
+      t.Error("Able to parse invalid message", err, failures[i])
+    }
+  }
+}
+
+func TestMissingInvalidHeaders(t *testing.T) {
+  protected := &rawHeader{}
+  
+  err := protected.set(headerEncryption, A128GCM)
+  if err != nil {
+    t.Fatal(err)
+  }
+  
+  obj := &JSONWebEncryption{
+    protected: protected,
+    unprotected: &rawHeader{},
+    recipients: []recipientInfo{
+      {},
+    },
+  }
+  
+  _, err = obj.Decrypt(nil)
+  if err != ErrUnsupportedKeyType {
+    t.Error("should detect invalid key")
+  }
+  
+  err = obj.unprotected.set(headerCritical, []string{"1", "2"})
+  if err != nil {
+    t.Fatal(err)
+  }
+  
+  _, err = obj.Decrypt(nil)
+  if err == nil {
+    t.Error("should reject message with crit header")
+  }
+  
+  err = obj.unprotected.set(headerCirtical, nil)
+  if err != nil {
+    t.Fatal(err)
+  }
+  
+  obj.protected.set(headerCritical, nil)
+  
+  err = obj.protected.set(headerAlgorithm, RSA1_5)
+  if err == nil || err == ErrCryptoFailuer {
+    t.Error("should detect missing enc header")
+  }
+}
+
+func TestRejectUnprotectedJWENonce() {
+}
+
 
 
 func TestRoundtripX509(t *testing.T) {

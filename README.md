@@ -5,6 +5,28 @@ https://github.com/square/go-jose
 ```go
 // jwk_test.go
 
+func TestCompatparseJWE(t *testing.T) {
+  msg := ""
+  _, err := ParseEncrypted(msg)
+  if err != nil {
+    t.Error("Unable to parse valid message:", err)
+  }
+  
+  failures := []string{
+    "",
+    "",
+  }
+  
+  for _, msg := range failures {
+    _, err = ParseEncrypted(msg)
+    if err == nil {
+      t.Error("Able to parse invalid message", msg)
+    }
+  }
+}
+
+
+
 func TestRoundtripX509(t *testing.T) {
   X5tSHA1 := sha1.Sum(testCertificates[0]. Raw)
   x5tSHA256 := sha256.Sum(testCertificates[0].Raw)

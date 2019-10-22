@@ -5,16 +5,31 @@ https://github.com/square/go-jose
 ```go
 // jwk_test.go
 
+func TestEmbeddedHMAC(t *testing.T) {
+  msg := `{"payload":"xxx","protected":"xxx"}`
+  
+  _, err := ParseSigned(msg)
+  if err == nil {
+    t.Error("should not allow parsing JWS with embedded JWK HMAC key")
+  }
+}
+
 func TestCompatparseJWE(t *testing.T) {
-  msg := ""
+  msg := "xxxx"
   _, err := ParseEncrypted(msg)
   if err != nil {
     t.Error("Unable to parse valid message:", err)
   }
   
+  msg = "xxxx"
+  _, err = ParseSigned(msg)
+  if err != nil {
+    t.Error("Unable to parse valid message:", err)
+  }
+  
   failures := []string{
-    "",
-    "",
+    "xxx",
+    "xxx",
   }
   
   for _, msg := range failures {
@@ -28,7 +43,6 @@ func TestCompatparseJWE(t *testing.T) {
 func TestFullParseJWE(t *testing.T) {
   successes := []string{
     ""
-    ""
   }
   
   for i := range successes {
@@ -39,9 +53,10 @@ func TestFullParseJWE(t *testing.T) {
   }
   
   failures := []string{
+    "{}",
+    "{XX",
     "",
-    "",
-    
+    ""
   }
   
   for i := range failures {
